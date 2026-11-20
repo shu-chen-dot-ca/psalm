@@ -1702,6 +1702,7 @@ final class Populator
                 $class_constant_storage->attributes,
                 $class_constant_storage->suppressed_issues,
                 $class_constant_storage->description,
+                signature_type: $class_constant_storage->signature_type,
             );
         }
     }

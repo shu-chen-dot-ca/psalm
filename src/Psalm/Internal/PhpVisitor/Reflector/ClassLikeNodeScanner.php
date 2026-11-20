@@ -1705,6 +1705,22 @@ final class ClassLikeNodeScanner
             }
         }
 
+        $signature_type = null;
+        if ($stmt->type) {
+            $parser_const_type = $stmt->type;
+            /** @var Identifier|IntersectionType|Name|NullableType|UnionType $parser_const_type */
+
+            $signature_type = TypeHintResolver::resolve(
+                $parser_const_type,
+                new CodeLocation($this->file_scanner, $parser_const_type),
+                $this->codebase,
+                $this->file_storage,
+                $storage,
+                $this->aliases,
+                $this->codebase->analysis_php_version_id,
+            );
+        }
+
         foreach ($stmt->consts as $const) {
             if (isset($storage->constants[$const->name->name])
                 || isset($storage->enum_cases[$const->name->name])
@@ -1815,6 +1831,7 @@ final class ClassLikeNodeScanner
                 $suppressed_issues,
                 $description,
                 $since_php_version_id,
+                $signature_type,
             );
 
             if ($this->codebase->analysis_php_version_id >= 8_03_00
