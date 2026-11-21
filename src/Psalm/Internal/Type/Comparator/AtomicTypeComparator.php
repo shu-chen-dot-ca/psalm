@@ -499,6 +499,7 @@ final class AtomicTypeComparator
                 && $input_type_part instanceof TNamedObject
                 && $container_type_part->is_static
                 && !$input_type_part->is_static
+                && !ObjectComparator::isSealedClass($codebase, $container_type_part->value)
             ) {
                 if ($atomic_comparison_result) {
                     $atomic_comparison_result->type_coerced = true;
@@ -918,6 +919,7 @@ final class AtomicTypeComparator
             && $input_type_part instanceof TNamedObject
             && $container_type_part->is_static
             && !$input_type_part->is_static
+            && !ObjectComparator::isSealedClass($codebase, $container_type_part->value)
         ) {
             if ($atomic_comparison_result) {
                 $atomic_comparison_result->type_coerced = true;

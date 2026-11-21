@@ -97,7 +97,8 @@ final class ObjectComparator
             } elseif ($intersection_container_type instanceof TCallableObject) {
                 $intersection_container_type_lower = 'callable-object';
             } else {
-                $container_was_static = $intersection_container_type->is_static;
+                $container_was_static = $intersection_container_type->is_static
+                    && !self::isSealedClass($codebase, $intersection_container_type->value);
 
                 $intersection_container_type_lower = strtolower(
                     $codebase->classlikes->getUnAliasedName(
@@ -371,5 +372,21 @@ final class ObjectComparator
         }
 
         return false;
+    }
+
+    /**
+     * A final class or an enum has no subclass, so its late static type is the class itself.
+     *
+     * @psalm-capabilities read-props
+     */
+    public static function isSealedClass(Codebase $codebase, string $class): bool
+    {
+        if (!$codebase->classlike_storage_provider->has($class)) {
+            return false;
+        }
+
+        $storage = $codebase->classlike_storage_provider->get($class);
+
+        return $storage->final || $storage->is_enum;
     }
 }
