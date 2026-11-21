@@ -3308,6 +3308,24 @@ final class MethodSignatureTest extends TestCase
                 'error_levels' => [],
                 'php_version' => '8.4',
             ],
+            'docblockFinalClassSelfForAbstractTraitStatic' => [
+                'code' => '<?php
+                    trait t {
+                        abstract public function ret(): static;
+                    }
+
+                    /** @final */
+                    class b {
+                        use t;
+
+                        public function ret(): self {
+                            return $this;
+                        }
+                    }',
+                'error_message' => 'MethodSignatureMismatch',
+                'error_levels' => [],
+                'php_version' => '8.5',
+            ],
             'enumSelfForStaticBefore85' => [
                 'code' => '<?php
                     interface a {

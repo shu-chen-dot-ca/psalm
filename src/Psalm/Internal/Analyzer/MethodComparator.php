@@ -1410,6 +1410,15 @@ final class MethodComparator
             )
             : UnionTypeComparator::isContainedByInPhp($implementer_signature_return_type, $guide_signature_return_type);
 
+        // a final class has no other static than itself, but before PHP 8.5 its `self` still doesn't satisfy `static`
+        if ($is_contained_by
+            && !$resolve_static_to_final_class
+            && $implementer_signature_return_type
+            && self::replacesStaticWithItsClass($implementer_signature_return_type, $guide_signature_return_type)
+        ) {
+            $is_contained_by = false;
+        }
+
         if (!$is_contained_by) {
             if ($codebase->analysis_php_version_id >= 8_00_00
                       || $guide_classlike_storage->is_trait === $implementer_classlike_storage->is_trait
@@ -1662,6 +1671,31 @@ final class MethodComparator
 
         return UnionTypeComparator::isContainedBy($codebase, $input, $container, false, false, $comparison_result)
             && !$comparison_result->to_string_cast;
+    }
+
+    /**
+     * Whether the implementer returns a class by name where the guide returns `static` of that class
+     *
+     * @psalm-pure
+     */
+    private static function replacesStaticWithItsClass(Union $implementer, Union $guide): bool
+    {
+        foreach ($guide->getAtomicTypes() as $guide_type) {
+            if (!$guide_type instanceof TNamedObject || !$guide_type->is_static) {
+                continue;
+            }
+
+            foreach ($implementer->getAtomicTypes() as $implementer_type) {
+                if ($implementer_type instanceof TNamedObject
+                    && !$implementer_type->is_static
+                    && strtolower($implementer_type->value) === strtolower($guide_type->value)
+                ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
